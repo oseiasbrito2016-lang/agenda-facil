@@ -104,7 +104,7 @@ function DashboardContent() {
     }
   }
 
-  const isPro = estabelecimento?.plano === 'pro'
+  const isPro = estabelecimento?.plano === 'pro' || estabelecimento?.plano === 'profissional'
   const agendamentosRestantes = !isPro ? Math.max(0, 5 - (estabelecimento?.agendamentos_trial ?? 0)) : null
 
   if (!usuario) return (
