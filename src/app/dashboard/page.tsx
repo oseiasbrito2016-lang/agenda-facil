@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { formatarPreco } from '@/lib/utils'
@@ -13,7 +13,7 @@ function formatarHoraBR(dataISO: string): string {
   return new Date(dataISO).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })
 }
 
-export default function Dashboard() {
+function DashboardContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
@@ -124,7 +124,7 @@ export default function Dashboard() {
         .fade-in { animation: fadeIn .4s ease both; }
       `}</style>
 
-      {/* ✅ Banner plano ativado */}
+      {/* Banner plano ativado */}
       {planoAtivado && (
         <div className="fade-in" style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 14, padding: '16px 24px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12 }}>
           <span style={{ fontSize: 24 }}>🎉</span>
@@ -144,9 +144,7 @@ export default function Dashboard() {
           display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{ fontSize: 36 }}>
-              {agendamentosRestantes === 0 ? '🔒' : '⚡'}
-            </div>
+            <div style={{ fontSize: 36 }}>{agendamentosRestantes === 0 ? '🔒' : '⚡'}</div>
             <div>
               <div style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>
                 {agendamentosRestantes === 0
@@ -158,21 +156,14 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-          <button
-            onClick={assinar}
-            disabled={assinando}
-            style={{
-              background: '#00C27C', color: '#fff', padding: '12px 28px',
-              borderRadius: 100, fontSize: 14, fontWeight: 600, cursor: assinando ? 'not-allowed' : 'pointer',
-              border: 'none', opacity: assinando ? 0.7 : 1, whiteSpace: 'nowrap',
-            }}
-          >
+          <button onClick={assinar} disabled={assinando}
+            style={{ background: '#00C27C', color: '#fff', padding: '12px 28px', borderRadius: 100, fontSize: 14, fontWeight: 600, cursor: assinando ? 'not-allowed' : 'pointer', border: 'none', opacity: assinando ? 0.7 : 1, whiteSpace: 'nowrap' }}>
             {assinando ? 'Redirecionando...' : '💳 Assinar agora — R$49,90/mês'}
           </button>
         </div>
       )}
 
-      {/* ✅ Badge Pro */}
+      {/* Badge Pro */}
       {isPro && (
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#00C27C15', border: '1px solid #00C27C40', borderRadius: 100, padding: '6px 14px', marginBottom: 20 }}>
           <span style={{ fontSize: 14 }}>⭐</span>
@@ -281,5 +272,13 @@ export default function Dashboard() {
         </div>
       )}
     </main>
+  )
+}
+
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><p style={{ color: '#666' }}>Carregando...</p></div>}>
+      <DashboardContent />
+    </Suspense>
   )
 }
