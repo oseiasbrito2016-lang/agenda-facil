@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -43,9 +43,7 @@ function DashboardContent() {
     if (!estab) return
     setEstabelecimento(estab)
 
-    // DEBUG — remova após confirmar o valor do plano
-    console.log('✅ estabelecimento carregado:', estab)
-    console.log('📦 plano:', estab.plano)
+    console.log('plano:', estab.plano)
 
     const hoje = new Date()
     const inicioHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()).toISOString()
@@ -128,7 +126,6 @@ function DashboardContent() {
         .fade-in { animation: fadeIn .4s ease both; }
       `}</style>
 
-      {/* Banner plano ativado */}
       {planoAtivado && (
         <div className="fade-in" style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 14, padding: '16px 24px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12 }}>
           <span style={{ fontSize: 24 }}>🎉</span>
@@ -140,7 +137,6 @@ function DashboardContent() {
         </div>
       )}
 
-      {/* Banner para assinar — só aparece no trial */}
       {estabelecimento && !isPro && (
         <div className="fade-in" style={{
           background: 'linear-gradient(135deg, #0A0A0A 0%, #1a1a2e 100%)',
@@ -167,7 +163,6 @@ function DashboardContent() {
         </div>
       )}
 
-      {/* Badge Pro */}
       {isPro && (
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#00C27C15', border: '1px solid #00C27C40', borderRadius: 100, padding: '6px 14px', marginBottom: 20 }}>
           <span style={{ fontSize: 14 }}>⭐</span>
@@ -182,7 +177,6 @@ function DashboardContent() {
         <p style={{ color: '#666', fontSize: 15, marginTop: 6 }}>Aqui está um resumo do seu estabelecimento hoje.</p>
       </div>
 
-      {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 32 }}>
         <div className="stat-card" style={{ background: '#fff', borderRadius: 16, padding: 24, border: '1px solid #eee', boxShadow: '0 2px 8px rgba(0,0,0,.04)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -213,7 +207,6 @@ function DashboardContent() {
         </div>
       </div>
 
-      {/* Pendentes */}
       {pendentes.length > 0 && (
         <div style={{ background: '#fff', borderRadius: 16, padding: 24, border: '1px solid #eee', marginBottom: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
@@ -244,7 +237,6 @@ function DashboardContent() {
         </div>
       )}
 
-      {/* Link público */}
       {estabelecimento && (
         <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
           <div>
@@ -261,17 +253,6 @@ function DashboardContent() {
             <a href={'/agendar/' + estabelecimento.slug} target="_blank" style={{ background: '#00C27C', color: '#fff', padding: '10px 20px', borderRadius: 100, fontSize: 13, fontWeight: 600, textDecoration: 'none', display: 'inline-block' }}>
               👁 Ver página
             </a>
-          </div>
-        </div>
-      )}
-
-      {!estabelecimento && (
-        <div onClick={() => router.push('/dashboard/configuracoes')}
-          style={{ background: '#00C27C', borderRadius: 16, padding: '24px 28px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ fontSize: 32 }}>🚀</div>
-          <div>
-            <div style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>Configure seu estabelecimento agora</div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,.8)', marginTop: 4 }}>Adicione nome e informações para começar</div>
           </div>
         </div>
       )}
