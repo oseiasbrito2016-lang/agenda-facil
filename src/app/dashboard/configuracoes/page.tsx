@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { usePreferences, IDIOMAS, type Idioma } from '@/lib/preferences'
 
 const DIAS = [
   { key: 'seg', label: 'Seg' },
@@ -17,6 +18,7 @@ const DIAS = [
 export default function Configuracoes() {
   const router = useRouter()
   const supabase = createClient()
+  const { darkMode, setDarkMode, idioma, setIdioma, t } = usePreferences()
 
   const [nome, setNome] = useState('')
   const [slug, setSlug] = useState('')
@@ -87,60 +89,126 @@ export default function Configuracoes() {
     setTimeout(() => setSucesso(false), 3000)
   }
 
+  const bg = darkMode ? '#0f0f0f' : '#F5F5F2'
+  const bg2 = darkMode ? '#1a1a1a' : '#fff'
+  const border = darkMode ? '#2a2a2a' : '#eee'
+  const text = darkMode ? '#f0f0f0' : '#0A0A0A'
+  const text2 = darkMode ? '#aaa' : '#666'
+  const text3 = darkMode ? '#666' : '#999'
+  const inputBorder = darkMode ? '#333' : '#e5e7eb'
+
   return (
-    <main style={{ minHeight: '100vh', background: '#F5F5F2', padding: '40px 24px', fontFamily: "'DM Sans', sans-serif" }}>
+    <main style={{ minHeight: '100vh', background: bg, padding: '40px 24px', fontFamily: "'DM Sans', sans-serif", transition: 'background .2s' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
         * { box-sizing: border-box; }
         input:focus, textarea:focus { outline: none; border-color: #00C27C !important; box-shadow: 0 0 0 3px rgba(0,194,124,.15); }
+        input[type="time"]::-webkit-calendar-picker-indicator { filter: ${darkMode ? 'invert(1)' : 'none'}; }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: ${darkMode ? 'invert(1)' : 'none'}; }
       `}</style>
 
       <div style={{ maxWidth: 700, margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
           <div>
-            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 32, color: '#0A0A0A', margin: 0 }}>Configurações</h1>
-            <p style={{ color: '#666', marginTop: 6, fontSize: 14 }}>Configure seu estabelecimento</p>
+            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 32, color: text, margin: 0 }}>{t('configuracoes')}</h1>
+            <p style={{ color: text2, marginTop: 6, fontSize: 14 }}>Configure seu estabelecimento</p>
           </div>
-          <button onClick={() => router.push('/dashboard')} style={{ border: '1px solid #ddd', background: '#fff', padding: '10px 18px', borderRadius: 999, cursor: 'pointer', fontSize: 14 }}>← Voltar</button>
+          <button onClick={() => router.push('/dashboard')} style={{ border: `1px solid ${border}`, background: bg2, color: text2, padding: '10px 18px', borderRadius: 999, cursor: 'pointer', fontSize: 14 }}>{t('voltar')}</button>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
+          {/* Aparência e idioma */}
+          <div style={{ background: bg2, borderRadius: 16, padding: 28, border: `1px solid ${border}` }}>
+            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 20, color: text, margin: '0 0 20px' }}>{t('aparencia')}</h2>
+
+            {/* Modo escuro */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: text }}>{t('modoEscuro')}</div>
+                <div style={{ fontSize: 12, color: text3, marginTop: 2 }}>
+                  {darkMode ? '🌙 Ativo' : '☀️ Desativado'}
+                </div>
+              </div>
+              <div
+                onClick={() => setDarkMode(!darkMode)}
+                style={{
+                  width: 52, height: 28, borderRadius: 100, cursor: 'pointer', transition: 'background .2s',
+                  background: darkMode ? '#00C27C' : '#e5e7eb',
+                  position: 'relative', flexShrink: 0,
+                }}
+              >
+                <div style={{
+                  width: 22, height: 22, borderRadius: '50%', background: '#fff',
+                  position: 'absolute', top: 3, transition: 'left .2s',
+                  left: darkMode ? 27 : 3,
+                  boxShadow: '0 1px 4px rgba(0,0,0,.2)',
+                }} />
+              </div>
+            </div>
+
+            {/* Idioma */}
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: text, marginBottom: 12 }}>{t('idioma')}</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                {IDIOMAS.map(lang => {
+                  const ativo = idioma === lang.id
+                  return (
+                    <button
+                      key={lang.id}
+                      onClick={() => setIdioma(lang.id as Idioma)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 8,
+                        padding: '10px 16px', borderRadius: 12, cursor: 'pointer', transition: 'all .15s',
+                        border: `2px solid ${ativo ? '#00C27C' : inputBorder}`,
+                        background: ativo ? '#00C27C15' : bg2,
+                        color: ativo ? '#00C27C' : text2,
+                        fontWeight: ativo ? 600 : 400, fontSize: 13,
+                      }}
+                    >
+                      <span style={{ fontSize: 18 }}>{lang.flag}</span>
+                      <span>{lang.label}</span>
+                      {ativo && <span style={{ fontSize: 11 }}>✓</span>}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+
           {/* Informações básicas */}
-          <div style={{ background: '#fff', borderRadius: 16, padding: 28, border: '1px solid #eee' }}>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 20, color: '#0A0A0A', margin: '0 0 20px' }}>Informações básicas</h2>
+          <div style={{ background: bg2, borderRadius: 16, padding: 28, border: `1px solid ${border}` }}>
+            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 20, color: text, margin: '0 0 20px' }}>{t('infoBasicas')}</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div>
-                <label style={{ fontSize: 13, fontWeight: 500, color: '#333', display: 'block', marginBottom: 6 }}>Nome do estabelecimento</label>
+                <label style={{ fontSize: 13, fontWeight: 500, color: text2, display: 'block', marginBottom: 6 }}>{t('nomeEstab')}</label>
                 <input
-                  style={{ width: '100%', padding: '12px 16px', borderRadius: 10, border: '1.5px solid #e5e7eb', fontSize: 15 }}
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: 10, border: `1.5px solid ${inputBorder}`, fontSize: 15, background: bg2, color: text }}
                   type="text" value={nome} placeholder="Ex: Barbearia do João"
                   onChange={e => { setNome(e.target.value); setSlug(gerarSlug(e.target.value)) }}
                 />
               </div>
               <div>
-                <label style={{ fontSize: 13, fontWeight: 500, color: '#333', display: 'block', marginBottom: 6 }}>Link de agendamento</label>
+                <label style={{ fontSize: 13, fontWeight: 500, color: text2, display: 'block', marginBottom: 6 }}>{t('linkAgend')}</label>
                 <input
-                  style={{ width: '100%', padding: '12px 16px', borderRadius: 10, border: '1.5px solid #e5e7eb', fontSize: 15 }}
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: 10, border: `1.5px solid ${inputBorder}`, fontSize: 15, background: bg2, color: text }}
                   type="text" value={slug} placeholder="barbearia-do-joao"
                   onChange={e => setSlug(gerarSlug(e.target.value))}
                 />
-                <p style={{ fontSize: 12, color: '#00C27C', marginTop: 6 }}>
-                  agendafacil.com/agendar/{slug || '...'}
-                </p>
+                <p style={{ fontSize: 12, color: '#00C27C', marginTop: 6 }}>agendafacil.com/agendar/{slug || '...'}</p>
               </div>
               <div>
-                <label style={{ fontSize: 13, fontWeight: 500, color: '#333', display: 'block', marginBottom: 6 }}>Telefone</label>
+                <label style={{ fontSize: 13, fontWeight: 500, color: text2, display: 'block', marginBottom: 6 }}>{t('telefone')}</label>
                 <input
-                  style={{ width: '100%', padding: '12px 16px', borderRadius: 10, border: '1.5px solid #e5e7eb', fontSize: 15 }}
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: 10, border: `1.5px solid ${inputBorder}`, fontSize: 15, background: bg2, color: text }}
                   type="text" value={telefone} placeholder="(11) 99999-9999"
                   onChange={e => setTelefone(e.target.value)}
                 />
               </div>
               <div>
-                <label style={{ fontSize: 13, fontWeight: 500, color: '#333', display: 'block', marginBottom: 6 }}>Descrição</label>
+                <label style={{ fontSize: 13, fontWeight: 500, color: text2, display: 'block', marginBottom: 6 }}>{t('descricao')}</label>
                 <textarea
-                  style={{ width: '100%', padding: '12px 16px', borderRadius: 10, border: '1.5px solid #e5e7eb', fontSize: 15, resize: 'vertical' }}
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: 10, border: `1.5px solid ${inputBorder}`, fontSize: 15, resize: 'vertical', background: bg2, color: text }}
                   rows={3} value={descricao} placeholder="Descreva seu estabelecimento..."
                   onChange={e => setDescricao(e.target.value)}
                 />
@@ -149,13 +217,12 @@ export default function Configuracoes() {
           </div>
 
           {/* Horário de funcionamento */}
-          <div style={{ background: '#fff', borderRadius: 16, padding: 28, border: '1px solid #eee' }}>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 20, color: '#0A0A0A', margin: '0 0 6px' }}>Horário de funcionamento</h2>
-            <p style={{ fontSize: 13, color: '#999', margin: '0 0 20px' }}>Define os horários disponíveis para agendamento</p>
+          <div style={{ background: bg2, borderRadius: 16, padding: 28, border: `1px solid ${border}` }}>
+            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 20, color: text, margin: '0 0 6px' }}>{t('horarioFunc')}</h2>
+            <p style={{ fontSize: 13, color: text3, margin: '0 0 20px' }}>Define os horários disponíveis para agendamento</p>
 
-            {/* Dias da semana */}
             <div style={{ marginBottom: 24 }}>
-              <label style={{ fontSize: 13, fontWeight: 500, color: '#333', display: 'block', marginBottom: 10 }}>Dias de atendimento</label>
+              <label style={{ fontSize: 13, fontWeight: 500, color: text2, display: 'block', marginBottom: 10 }}>{t('diasAtend')}</label>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {DIAS.map(d => (
                   <button
@@ -163,9 +230,9 @@ export default function Configuracoes() {
                     onClick={() => toggleDia(d.key)}
                     style={{
                       padding: '8px 16px', borderRadius: 100, fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all .15s',
-                      background: diasFuncionamento.includes(d.key) ? '#00C27C' : '#f5f5f2',
-                      color: diasFuncionamento.includes(d.key) ? '#fff' : '#666',
-                      border: '2px solid ' + (diasFuncionamento.includes(d.key) ? '#00C27C' : '#e5e7eb'),
+                      background: diasFuncionamento.includes(d.key) ? '#00C27C' : bg,
+                      color: diasFuncionamento.includes(d.key) ? '#fff' : text2,
+                      border: '2px solid ' + (diasFuncionamento.includes(d.key) ? '#00C27C' : inputBorder),
                     }}
                   >
                     {d.label}
@@ -174,42 +241,39 @@ export default function Configuracoes() {
               </div>
             </div>
 
-            {/* Horários */}
             <div style={{ display: 'flex', gap: 16 }}>
               <div style={{ flex: 1 }}>
-                <label style={{ fontSize: 13, fontWeight: 500, color: '#333', display: 'block', marginBottom: 6 }}>Abertura</label>
+                <label style={{ fontSize: 13, fontWeight: 500, color: text2, display: 'block', marginBottom: 6 }}>{t('abertura')}</label>
                 <input
                   type="time" value={horarioAbertura}
                   onChange={e => setHorarioAbertura(e.target.value)}
-                  style={{ width: '100%', padding: '12px 16px', borderRadius: 10, border: '1.5px solid #e5e7eb', fontSize: 15 }}
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: 10, border: `1.5px solid ${inputBorder}`, fontSize: 15, background: bg2, color: text }}
                 />
               </div>
               <div style={{ flex: 1 }}>
-                <label style={{ fontSize: 13, fontWeight: 500, color: '#333', display: 'block', marginBottom: 6 }}>Fechamento</label>
+                <label style={{ fontSize: 13, fontWeight: 500, color: text2, display: 'block', marginBottom: 6 }}>{t('fechamento')}</label>
                 <input
                   type="time" value={horarioFechamento}
                   onChange={e => setHorarioFechamento(e.target.value)}
-                  style={{ width: '100%', padding: '12px 16px', borderRadius: 10, border: '1.5px solid #e5e7eb', fontSize: 15 }}
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: 10, border: `1.5px solid ${inputBorder}`, fontSize: 15, background: bg2, color: text }}
                 />
               </div>
             </div>
 
-            {/* Preview */}
-            <div style={{ marginTop: 16, background: '#f0fdf4', borderRadius: 10, padding: '12px 16px', fontSize: 13, color: '#166534' }}>
+            <div style={{ marginTop: 16, background: darkMode ? '#052e16' : '#f0fdf4', borderRadius: 10, padding: '12px 16px', fontSize: 13, color: darkMode ? '#86efac' : '#166534' }}>
               ✓ Agendamentos disponíveis das <strong>{horarioAbertura}</strong> às <strong>{horarioFechamento}</strong> nos dias:{' '}
               <strong>{diasFuncionamento.map(d => DIAS.find(x => x.key === d)?.label).join(', ') || '—'}</strong>
             </div>
           </div>
 
-          {/* Erros / sucesso */}
-          {erro && <div style={{ background: '#FEF2F2', color: '#DC2626', padding: 14, borderRadius: 12, fontSize: 14 }}>{erro}</div>}
-          {sucesso && <div style={{ background: '#F0FDF4', color: '#16A34A', padding: 14, borderRadius: 12, fontSize: 14 }}>✓ Configurações salvas com sucesso!</div>}
+          {erro && <div style={{ background: darkMode ? '#2d0a0a' : '#FEF2F2', color: '#DC2626', padding: 14, borderRadius: 12, fontSize: 14 }}>{erro}</div>}
+          {sucesso && <div style={{ background: darkMode ? '#052e16' : '#F0FDF4', color: '#16A34A', padding: 14, borderRadius: 12, fontSize: 14 }}>{t('sucesso')}</div>}
 
           <button
             onClick={salvar} disabled={salvando}
             style={{ background: '#00C27C', color: '#fff', border: 'none', padding: '16px', borderRadius: 999, fontWeight: 600, fontSize: 15, cursor: salvando ? 'not-allowed' : 'pointer', opacity: salvando ? 0.7 : 1 }}
           >
-            {salvando ? 'Salvando...' : 'Salvar configurações'}
+            {salvando ? t('salvando') : t('salvar')}
           </button>
         </div>
       </div>

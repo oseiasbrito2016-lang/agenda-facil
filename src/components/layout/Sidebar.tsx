@@ -3,11 +3,13 @@
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useState, useEffect, useRef } from 'react'
+import { usePreferences } from '@/lib/preferences'
 
 export default function Sidebar() {
   const router = useRouter()
   const pathname = usePathname()
   const supabase = createClient()
+  const { darkMode, t } = usePreferences()
   const [notificacoes, setNotificacoes] = useState(0)
   const [estabelecimento, setEstabelecimento] = useState<any>(null)
   const [recolhida, setRecolhida] = useState(false)
@@ -16,6 +18,15 @@ export default function Sidebar() {
   const [showLogoMenu, setShowLogoMenu] = useState(false)
   const logoMenuRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const bg = darkMode ? '#141414' : '#fff'
+  const border = darkMode ? '#2a2a2a' : '#eee'
+  const text = darkMode ? '#f0f0f0' : '#0A0A0A'
+  const text2 = darkMode ? '#aaa' : '#555'
+  const text3 = darkMode ? '#666' : '#999'
+  const hoverBg = darkMode ? 'rgba(0,194,124,0.12)' : 'rgba(0,194,124,0.08)'
+  const menuBg = darkMode ? '#1e1e1e' : '#fff'
+  const menuItemHover = darkMode ? '#2a2a2a' : '#f5f5f5'
 
   useEffect(() => {
     carregarDados()
@@ -112,15 +123,14 @@ export default function Sidebar() {
     router.push('/auth/login')
   }
 
-  // ✅ Faturamento adicionado
   const menuItems = [
-    { icon: '🏠', label: 'Painel',         href: '/dashboard' },
-    { icon: '📅', label: 'Agendamentos',   href: '/dashboard/agendamentos', badge: notificacoes },
-    { icon: '✂️', label: 'Serviços',       href: '/dashboard/servicos' },
-    { icon: '👥', label: 'Profissionais',  href: '/dashboard/profissionais' },
-    { icon: '👤', label: 'Clientes',       href: '/dashboard/clientes' },
-    { icon: '💰', label: 'Faturamento',    href: '/dashboard/faturamento' },
-    { icon: '⚙️', label: 'Configurações', href: '/dashboard/configuracoes' },
+    { icon: '🏠', labelKey: 'painel',        href: '/dashboard' },
+    { icon: '📅', labelKey: 'agendamentos',  href: '/dashboard/agendamentos', badge: notificacoes },
+    { icon: '✂️', labelKey: 'servicos',      href: '/dashboard/servicos' },
+    { icon: '👥', labelKey: 'profissionais', href: '/dashboard/profissionais' },
+    { icon: '👤', labelKey: 'clientes',      href: '/dashboard/clientes' },
+    { icon: '💰', labelKey: 'faturamento',   href: '/dashboard/faturamento' },
+    { icon: '⚙️', labelKey: 'configuracoes', href: '/dashboard/configuracoes' },
   ]
 
   const inicial = estabelecimento?.nome?.charAt(0)?.toUpperCase() ?? '?'
@@ -130,13 +140,13 @@ export default function Sidebar() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
         .sidebar-item { transition: all .15s; cursor: pointer; }
-        .sidebar-item:hover { background: rgba(0,194,124,0.08) !important; color: #00C27C !important; }
-        .sidebar-item.active { background: rgba(0,194,124,0.12) !important; color: #00C27C !important; }
-        .toggle-btn:hover { background: #f0f0f0 !important; }
+        .sidebar-item:hover { background: ${hoverBg} !important; color: #00C27C !important; }
+        .sidebar-item.active { background: ${hoverBg} !important; color: #00C27C !important; }
+        .toggle-btn:hover { background: ${darkMode ? '#2a2a2a' : '#f0f0f0'} !important; }
         .logo-avatar { transition: all .2s; }
         .logo-avatar:hover .logo-overlay { opacity: 1 !important; }
-        .logo-menu-item:hover { background: #f5f5f5 !important; }
-        .logo-menu-item.danger:hover { background: #fef2f2 !important; color: #ef4444 !important; }
+        .logo-menu-item:hover { background: ${menuItemHover} !important; }
+        .logo-menu-item.danger:hover { background: ${darkMode ? '#2d0a0a' : '#fef2f2'} !important; color: #ef4444 !important; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .spinning { animation: spin 1s linear infinite; display: inline-block; }
       `}</style>
@@ -152,11 +162,11 @@ export default function Sidebar() {
       <aside style={{
         width: recolhida ? 72 : 240,
         minHeight: '100vh',
-        background: '#fff',
-        borderRight: '1px solid #eee',
+        background: bg,
+        borderRight: `1px solid ${border}`,
         display: 'flex',
         flexDirection: 'column',
-        transition: 'width .25s ease',
+        transition: 'width .25s ease, background .2s',
         position: 'fixed',
         top: 0, left: 0,
         zIndex: 50,
@@ -164,24 +174,24 @@ export default function Sidebar() {
       }}>
 
         {/* Header */}
-        <div style={{ padding: recolhida ? '20px 0' : '24px 20px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: recolhida ? 'center' : 'space-between' }}>
+        <div style={{ padding: recolhida ? '20px 0' : '24px 20px', borderBottom: `1px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: recolhida ? 'center' : 'space-between' }}>
           {!recolhida && (
-            <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 20, whiteSpace: 'nowrap' }}>
+            <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 20, whiteSpace: 'nowrap', color: text }}>
               Agenda<span style={{ color: '#00C27C' }}>Fácil</span>
             </div>
           )}
           <button className="toggle-btn" onClick={() => setRecolhida(!recolhida)}
-            style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 6, borderRadius: 8, fontSize: 16, color: '#666', transition: 'background .2s' }}>
+            style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 6, borderRadius: 8, fontSize: 16, color: text3, transition: 'background .2s' }}>
             {recolhida ? '→' : '←'}
           </button>
         </div>
 
         {/* Estabelecimento + logo */}
         {estabelecimento && (
-          <div style={{ padding: recolhida ? '16px 0' : '16px 20px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', gap: recolhida ? 0 : 12, justifyContent: recolhida ? 'center' : 'flex-start' }}>
+          <div style={{ padding: recolhida ? '16px 0' : '16px 20px', borderBottom: `1px solid ${border}`, display: 'flex', alignItems: 'center', gap: recolhida ? 0 : 12, justifyContent: recolhida ? 'center' : 'flex-start' }}>
             <div ref={logoMenuRef} style={{ position: 'relative', flexShrink: 0 }}>
               <div className="logo-avatar" onClick={() => !uploadingLogo && setShowLogoMenu(v => !v)}
-                style={{ width: 40, height: 40, borderRadius: 10, overflow: 'hidden', cursor: uploadingLogo ? 'default' : 'pointer', border: '2px solid #e5e7eb', position: 'relative', background: logoUrl ? '#fff' : '#00C27C', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                style={{ width: 40, height: 40, borderRadius: 10, overflow: 'hidden', cursor: uploadingLogo ? 'default' : 'pointer', border: `2px solid ${border}`, position: 'relative', background: logoUrl ? bg : '#00C27C', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 {uploadingLogo ? (
                   <span className="spinning" style={{ fontSize: 18 }}>⟳</span>
                 ) : logoUrl ? (
@@ -197,9 +207,9 @@ export default function Sidebar() {
               </div>
 
               {showLogoMenu && (
-                <div style={{ position: 'absolute', top: 46, left: 0, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', zIndex: 200, minWidth: 180, overflow: 'hidden', padding: '6px 0' }}>
+                <div style={{ position: 'absolute', top: 46, left: 0, background: menuBg, border: `1px solid ${border}`, borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', zIndex: 200, minWidth: 180, overflow: 'hidden', padding: '6px 0' }}>
                   <div className="logo-menu-item" onClick={() => { setShowLogoMenu(false); fileInputRef.current?.click() }}
-                    style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', fontSize: 13, color: '#333', cursor: 'pointer', transition: 'background .15s' }}>
+                    style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', fontSize: 13, color: text, cursor: 'pointer', transition: 'background .15s' }}>
                     <span>📁</span><span>{logoUrl ? 'Trocar logo' : 'Adicionar logo'}</span>
                   </div>
                   {logoUrl && (
@@ -208,8 +218,8 @@ export default function Sidebar() {
                       <span>🗑️</span><span>Remover logo</span>
                     </div>
                   )}
-                  <div style={{ padding: '6px 14px 4px', borderTop: '1px solid #f3f4f6', marginTop: 4 }}>
-                    <span style={{ fontSize: 10, color: '#bbb' }}>PNG, JPG, SVG — máx. 2MB</span>
+                  <div style={{ padding: '6px 14px 4px', borderTop: `1px solid ${border}`, marginTop: 4 }}>
+                    <span style={{ fontSize: 10, color: text3 }}>PNG, JPG, SVG — máx. 2MB</span>
                   </div>
                 </div>
               )}
@@ -217,8 +227,8 @@ export default function Sidebar() {
 
             {!recolhida && (
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 10, color: '#999', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 2 }}>Estabelecimento</div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#333', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <div style={{ fontSize: 10, color: text3, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 2 }}>{t('estabelecimento')}</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {estabelecimento.nome}
                 </div>
               </div>
@@ -233,9 +243,9 @@ export default function Sidebar() {
             return (
               <div key={item.href} className={`sidebar-item${ativo ? ' active' : ''}`}
                 onClick={() => router.push(item.href)}
-                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: recolhida ? '10px 0' : '10px 12px', borderRadius: 10, justifyContent: recolhida ? 'center' : 'flex-start', color: ativo ? '#00C27C' : '#555', fontWeight: ativo ? 600 : 400, fontSize: 14, position: 'relative' }}>
+                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: recolhida ? '10px 0' : '10px 12px', borderRadius: 10, justifyContent: recolhida ? 'center' : 'flex-start', color: ativo ? '#00C27C' : text2, fontWeight: ativo ? 600 : 400, fontSize: 14, position: 'relative' }}>
                 <span style={{ fontSize: 18, flexShrink: 0 }}>{item.icon}</span>
-                {!recolhida && <span style={{ whiteSpace: 'nowrap' }}>{item.label}</span>}
+                {!recolhida && <span style={{ whiteSpace: 'nowrap' }}>{t(item.labelKey)}</span>}
                 {item.badge && item.badge > 0 && (
                   <span style={{ background: '#ef4444', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 100, marginLeft: 'auto', flexShrink: 0 }}>
                     {item.badge}
@@ -248,13 +258,13 @@ export default function Sidebar() {
 
         {/* Link público */}
         {!recolhida && estabelecimento && (
-          <div style={{ padding: '12px 10px', borderTop: '1px solid #f0f0f0' }}>
+          <div style={{ padding: '12px 10px', borderTop: `1px solid ${border}` }}>
             <div onClick={() => { navigator.clipboard.writeText(window.location.origin + '/agendar/' + estabelecimento.slug); alert('Link copiado!') }}
               style={{ padding: '10px 12px', borderRadius: 10, background: '#00C27C15', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 16 }}>🔗</span>
               <div>
-                <div style={{ fontSize: 11, color: '#00C27C', fontWeight: 600 }}>Copiar link</div>
-                <div style={{ fontSize: 10, color: '#999', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 140 }}>
+                <div style={{ fontSize: 11, color: '#00C27C', fontWeight: 600 }}>{t('copiarLink')}</div>
+                <div style={{ fontSize: 10, color: text3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 140 }}>
                   /agendar/{estabelecimento.slug}
                 </div>
               </div>
@@ -263,11 +273,11 @@ export default function Sidebar() {
         )}
 
         {/* Logout */}
-        <div style={{ padding: '12px 10px', borderTop: '1px solid #f0f0f0' }}>
+        <div style={{ padding: '12px 10px', borderTop: `1px solid ${border}` }}>
           <div className="sidebar-item" onClick={handleLogout}
-            style={{ display: 'flex', alignItems: 'center', gap: 12, padding: recolhida ? '10px 0' : '10px 12px', borderRadius: 10, color: '#999', fontSize: 14, justifyContent: recolhida ? 'center' : 'flex-start' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 12, padding: recolhida ? '10px 0' : '10px 12px', borderRadius: 10, color: text3, fontSize: 14, justifyContent: recolhida ? 'center' : 'flex-start' }}>
             <span style={{ fontSize: 18 }}>🚪</span>
-            {!recolhida && <span>Sair</span>}
+            {!recolhida && <span>{t('sair')}</span>}
           </div>
         </div>
       </aside>
